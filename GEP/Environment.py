@@ -102,9 +102,12 @@ class Environment(metaclass = abc.ABCMeta):
 
     def reproduce(self, numDaughters):
         '''given a list of chromosomes and the number of times for the to be duplicated,
-           sets new generation of randomly order list of all the duplicated chromosomes
-           the tuples in self.chromosome are create here, not in select'''
-        pass
+           sets new generation of randomly order list of all the duplicated chromosomes'''
+        newGeneration = []
+        for index in numDaughters:
+            newGeneration.append(copy.deepcopy(self.chromosomes[index]))
+
+        self.chromosomes = newGeneration
 
     def modify(self):
         '''calls the genetic modifiers with their respective probabilities'''
