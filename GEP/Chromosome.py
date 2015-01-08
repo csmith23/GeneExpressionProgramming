@@ -58,17 +58,17 @@ class Chromosome():
 
     '''all recombination functions must first turn the gene list into one string, then back into separate genes'''
     def onePointRecombination(self, rate, other):
-        '''choose other chromosome, index in range 1 to length of chromosome - 1, then recombine with this[:index] + other[index:] and vice versa'''
+        '''choose other chromosome(should be the chromosome at i + 1 or -1 if i == length - 1), index in range 1 to length of chromosome - 1, then recombine with this[:index] + other[index:] and vice versa'''
         if random.random() < rate:
             pass
 
     def twoPointRecombination(self, rate, other):
-        '''choose other chromosome, two indices in range 1 to length of chromosome - 1, then recombine with this[:index1] + other[index1:index2] + this[index2:] and vice versa'''
+        '''choose other chromosome(should be the chromosome at i + 1 or -1 if i == length - 1), two indices in range 1 to length of chromosome - 1, then recombine with this[:index1] + other[index1:index2] + this[index2:] and vice versa'''
         if random.random() < rate:
             pass
 
     def geneRecombination(self, rate, other):
-        '''choose other chromosome, a gene index, and swap the two genes at that index'''
+        '''choose other chromosome(should be the chromosome at i + 1 or -1 if i == length - 1), a gene index, and swap the two genes at that index'''
         if random.random() < rate:
             pass
 
