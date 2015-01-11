@@ -4,8 +4,8 @@ import abc
 import random
 import copy
 
-from GEP.Genome import Genome
-from GEP.Chromosome import *
+from .Genome import Genome
+from .Chromosome import *
 
 class Environment(metaclass = abc.ABCMeta):
     def __init__(self):
@@ -32,7 +32,7 @@ class Environment(metaclass = abc.ABCMeta):
         self.ISTranspositionRate = 0.1
         self.RISTranspositionRate = 0.1
         self.GeneTranspositionRate = 0.1
-        self.OnePointRecombination = 0.4
+        self.OnePointRecombinationRate = 0.4
         self.TwoPointRecombinationRate = 0.2
         self.GeneRecombinationRate = 0.1
 
@@ -107,16 +107,22 @@ class Environment(metaclass = abc.ABCMeta):
         for index in numDaughters:
             newGeneration.append(copy.deepcopy(self.chromosomes[index]))
 
+        newGeneration = random.shuffle(newGeneration)
         self.chromosomes = newGeneration
 
     def modify(self):
         '''calls the genetic modifiers with their respective probabilities'''
         for chromosome in self.chromosomes:
+            if self.chromosomes[-1] is chromosome:
+                otherIndex = 0
+            else:
+                otherIndex = self.chromosomes.index(chromosome) + 1
+
             chromosome[0].mutation(self.mutationRate)
             chromosome[0].inversion(self.inversionRate)
             chromosome[0].ISTransposition(self.ISTranspositionRate)
             chromosome[0].RISTransposition(self.RISTranspositionRate)
             chromosome[0].geneTransposition(self.GeneTranspositionRate)
-            chromosome[0].onePointRecombination(self.OnePointRecombination)
-            chromosome[0].twoPointRecombination(self.TwoPointRecombinationRate)
-            chromosome[0].geneRecombination(self.GeneRecombinationRate)
+            chromosome[0].onePointRecombination(self.OnePointRecombinationRate, self.chromosomes[otherIndex][0])
+            chromosome[0].twoPointRecombination(self.TwoPointRecombinationRate, self.chromosomes[otherIndex][0])
+            chromosome[0].geneRecombination(self.GeneRecombinationRate, self.chromosomes[otherIndex][0])

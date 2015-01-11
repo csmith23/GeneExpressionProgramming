@@ -1,6 +1,6 @@
 __author__ = 'Coleman'
 
-from GEP.Chromosome import Chromosome
+from .Chromosome import Chromosome
 
 class Genome():
     def _add(inputs):
