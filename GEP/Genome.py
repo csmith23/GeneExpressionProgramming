@@ -1,7 +1,5 @@
 __author__ = 'Coleman'
 
-from .Chromosome import Chromosome
-
 class Genome():
     def _add(inputs):
         return sum(inputs)
@@ -10,7 +8,10 @@ class Genome():
     def _mul(inputs):
         return inputs[0] * inputs[1]
     def _div(inputs):
-        return inputs[0] / inputs[1]
+        if inputs[1] != 0:
+            return inputs[0] / inputs[1]
+        else:
+            return "Error"
 
     def _NOT(inputs):
         return not inputs[0]
@@ -34,16 +35,8 @@ class Genome():
     EXPONENTIAL_SET = {"E": (_exp, 1), "Q": (_sqrt, 1), "arity": 1}
 
     def __init__(self):
-        self.functions = {} #dictionary - character : (function, arity)
-        self.terminals = [] #list - character
-        self.arity = 0
+        self.functions = {"arity": 0}
+        self.terminals = []
 
-    def addFunctions(self, otherDict):
-        otherDict = dict(otherDict)
-        if ("arity" in self.functions) and ("arity" in otherDict):
-            if otherDict["arity"] < self.functions["arity"]:
-                otherDict["arity"] = self.functions["arity"]
-        self.function.update(dict)
-
-    def Chromosome(self, numGenes,  length):
-        return Chromosome(self, numGenes, length)
+    def symbols(self):
+        return self.functions.update(self.terminals.zip([(0, 0) for i in range(len(self.terminals))]))
