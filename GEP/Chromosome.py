@@ -16,3 +16,27 @@ class Chromosome():
             newGenes.append(gene.replicate())
 
         return newGenes
+        
+    def mutation():
+        pass
+    
+    def inversion():
+        pass
+    
+    def ISTransposition():
+        pass
+    
+    def RISTransposition():
+        pass
+    
+    def geneTransposition():
+        pass
+    
+    def onePointRecombination():
+        pass
+    
+    def twoPointRecombination():
+        pass
+    
+    def geneRecombination():
+        pass
