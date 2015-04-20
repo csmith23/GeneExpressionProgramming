@@ -2,13 +2,21 @@ __author__ = 'Coleman'
 
 class Genome():
     def _add(inputs):
+        if inputs[-1] == "Error" or inputs[-2] == "Error":
+            return 1
         inputs.append(inputs.pop(-2) + inputs.pop(-1))
     def _sub(inputs):
+        if inputs[-1] == "Error" or inputs[-2] == "Error":
+            return 1
         inputs.append(inputs.pop(-2) - inputs.pop(-1))
     def _mul(inputs):
+        if inputs[-1] == "Error" or inputs[-2] == "Error":
+            return 1
         inputs.append(inputs.pop(-2) * inputs.pop(-1))
     def _div(inputs):
-        if inputs[1] != 0:
+        if inputs[-1] == "Error" or inputs[-2] == "Error":
+            return 1
+        elif inputs[-1] != 0:
             inputs.append(inputs.pop(-2) / inputs.pop(-1))
         else:
             return 1
@@ -37,6 +45,13 @@ class Genome():
     def __init__(self):
         self.functions = {"arity": 0}
         self.terminals = []
+        self.homeoticTerminals = range(1)
 
     def symbols(self):
-        return self.functions.update(self.terminals.zip([(0, 0) for i in range(len(self.terminals))]))
+        symbols = self.functions.copy()
+        symbols.pop("arity", None)
+        for symbol in symbols.keys():
+            symbols[symbol] = symbols[symbol][1]
+
+        symbols.update({terminal: 0 for terminal in self.terminals + list(self.homeoticTerminals)})
+        return symbols

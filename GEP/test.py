@@ -1,6 +1,6 @@
 __author__ = 'Coleman'
 
-import GEP
+# import GEP
 
 # genome = Genome()
 #
@@ -94,63 +94,97 @@ import GEP
 #     return 2
 
 # use each gene concatenated and slice notation to return them as separate, even in head and tail
-elementLayers = []
-genome = {"/": (0, 2), "*": (0, 2), "a": (0, 0),"b": (0, 0)}
+# elementLayers = []
+# genome = {"/": (0, 2), "*": (0, 2), "a": (0, 0),"b": (0, 0)}
+#
+# def orderStack():
+#         orderStack = ["/", "*", "*", "a", "/", "b", "/", "a", "b", "a", "b", "a", "b", "a", "b"]
+#         arity = 1
+#         while arity > 0:
+#             evalElement = []
+#             for i in range(arity):
+#                 evalElement.append(orderStack.pop(0))
+#
+#             arity = 0
+#             for element in evalElement:
+#                 arity += genome[element][1]
+#
+#             elementLayers.append(evalElement)
+#
+# def evalRecur(layerIndex = 0):
+#     evalStack = []
+#     for i in range(genome[elementLayers[layerIndex][0]][1]):
+#         evalStack = evalStack + evalRecur(layerIndex + 1)
+#
+#     evalStack.append(elementLayers[layerIndex].pop(0))
+#     return evalStack
+#
+# def eval(evalStack, terminals, values, functions):
+#     returnStack = []
+#     for symbol in evalStack:
+#         if symbol in terminals:
+#             returnStack.append(values[terminals.index(symbol)])
+#         else:
+#             if functions[symbol](returnStack) == 1:
+#                 return 1
+#
+#         print(returnStack)
+#
+#     return returnStack[0]
+#
+# orderStack()
+# print(elementLayers)
+# evalStack = evalRecur()
+# print(evalStack)
+# def _ADD(stack):
+#     stack.append(stack[-2] + stack[-1])
+#     stack.pop(-2)
+#     stack.pop(-2)
+# def _SUB(stack):
+#     stack.append(stack[-2] - stack[-1])
+#     stack.pop(-2)
+#     stack.pop(-2)
+# def _MULT(stack):
+#     stack.append(stack[-2] * stack[-1])
+#     stack.pop(-2)
+#     stack.pop(-2)
+# def _DIV(stack):
+#     stack.append(stack[-2] / stack[-1])
+#     stack.pop(-2)
+#     stack.pop(-2)
+# functions = {'+': _ADD, '-': _SUB, '*': _MULT, '/': _DIV}
+# print(eval(evalStack, ['a', 'b'], [10, 7], functions))
+# print(10 / 7)
 
-def orderStack():
-        orderStack = ["/", "*", "*", "a", "/", "b", "/", "a", "b", "a", "b", "a", "b", "a", "b"]
-        arity = 1
-        while arity > 0:
-            evalElement = []
-            for i in range(arity):
-                evalElement.append(orderStack.pop(0))
 
-            arity = 0
-            for element in evalElement:
-                arity += genome[element][1]
 
-            elementLayers.append(evalElement)
 
-def evalRecur(layerIndex = 0):
-    evalStack = []
-    for i in range(genome[elementLayers[layerIndex][0]][1]):
-        evalStack = evalStack + evalRecur(layerIndex + 1)
 
-    evalStack.append(elementLayers[layerIndex].pop(0))
-    return evalStack
 
-def eval(evalStack, terminals, values, functions):
-    returnStack = []
-    for symbol in evalStack:
-        if symbol in terminals:
-            returnStack.append(values[terminals.index(symbol)])
-        else:
-            functions[symbol](returnStack)
 
-        print(returnStack)
 
-    return returnStack[0]
 
-orderStack()
-print(elementLayers)
-evalStack = evalRecur()
-print(evalStack)
-def _ADD(stack):
-    stack.append(stack[-2] + stack[-1])
-    stack.pop(-2)
-    stack.pop(-2)
-def _SUB(stack):
-    stack.append(stack[-2] - stack[-1])
-    stack.pop(-2)
-    stack.pop(-2)
-def _MULT(stack):
-    stack.append(stack[-2] * stack[-1])
-    stack.pop(-2)
-    stack.pop(-2)
-def _DIV(stack):
-    stack.append(stack[-2] / stack[-1])
-    stack.pop(-2)
-    stack.pop(-2)
-functions = {'+': _ADD, '-': _SUB, '*': _MULT, '/': _DIV}
-print(eval(evalStack, ['a', 'b'], [10, 7], functions))
-print(10 / 7)
+from GEP.Gene import Gene
+from GEP.Genome import Genome
+from GEP.Chromosome import Chromosome
+
+genome = Genome()
+genome.functions.update(Genome.ARITHMETIC_SET)
+genome.terminals = ['a', 'b']
+
+# gene = Gene(genome, False)
+# gene.initRand(5, 0)
+# # gene.head = ['/', 'a', '-', "b", 'b']
+# # gene.tail = ['c', 'c', 'b', 'b', 'a', 'a']
+# print(gene.head)
+# print(gene.tail)
+# print(gene.eval({terminal: value for (terminal, value) in list(zip(genome.terminals, [1, 2, 4]))}))
+
+chromosome = Chromosome()
+chromosome.initRand(3, 2, 5, genome)
+chromosome.printChromosome()
+print(end='\n\n\n')
+chromosome.geneTransposition(1, 1)
+chromosome.printChromosome()
+print(end='\n\n\n\n\n')
+print(chromosome.eval([0, 1]))

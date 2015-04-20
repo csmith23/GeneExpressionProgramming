@@ -3,35 +3,40 @@ __author__ = 'Coleman'
 import random
 
 class Gene():
-    def __init__(self, genome):
+    def __init__(self, genome, homeotic):
         self.genome = genome
         self.head = []
         self.tail = []
-        self.elementLayers = []
+        self.homeotic = homeotic
 
-    def initRand(self, length):
+    def initRand(self, length, numGenes):
         arity = self.genome.functions["arity"]
-        functions = self.genome.functions.keys()
-        functions.remove("arity")
-        terminals = self.genome.terminals
+        functions = list(self.genome.functions.keys())
+        functions.pop(functions.index("arity"))
+        if self.homeotic:
+            terminals = list(range(numGenes))
+            if numGenes > list(self.genome.homeoticTerminals)[-1]:
+                self.genome.homeoticTerminals = range(numGenes)
+        else:
+            terminals = self.genome.terminals
+
         self.head = [random.choice(functions + terminals) for i in range(length)]
         self.tail = [random.choice(terminals) for i in range(length * (arity - 1) + 1)]
         return self
 
     def replicate(self):
-        newGene = Gene(self.genome)
+        newGene = Gene(self.genome, self.homeotic)
         newGene.head = self.head[:]
-        self.tail = self.tail[:]
+        newGene.tail = self.tail[:]
         return newGene
 
     def eval(self, inputs):
-        self.elementLayers = []
-
-        self.orderStack()
-        evalStack = self.evalRecur()
-        return evalStack(evalStack, inputs)
+        elementLayers = self.orderStack()
+        evalStack = self.evalRecur(elementLayers)
+        return self.evalStack(evalStack, inputs)
 
     def orderStack(self):
+        elementLayers = []
         orderStack = self.head + self.tail
         arity = 1
         while arity > 0:
@@ -41,24 +46,28 @@ class Gene():
 
             arity = 0
             for element in evalElement:
-                arity += self.genome.symbols()[element][1]
+                arity += self.genome.symbols()[element]
 
-            self.elementLayers.append(evalElement)
+            elementLayers.append(evalElement)
 
-    def evalRecur(self, layerIndex = 0):
+        return elementLayers
+
+    def evalRecur(self, elementLayers, layerIndex = 0):
         evalStack = []
-        for i in range(self.genome.symbols()[self.elementLayers[layerIndex][0]][1]):
-            evalStack = evalStack + self.evalRecur(layerIndex + 1)
+        for i in range(self.genome.symbols()[elementLayers[layerIndex][0]]):
+            evalStack = evalStack + self.evalRecur(elementLayers, layerIndex + 1)
 
-        evalStack.append(self.elementLayers[layerIndex].pop(0))
+        evalStack.append(elementLayers[layerIndex].pop(0))
         return evalStack
 
     def evalStack(self, stack, inputs):
         returnStack = []
         for symbol in stack:
-            if symbol in self.genome.terminals:
-                returnStack.append(inputs[self.genome.terminals.index(symbol)])
+            if symbol in inputs.keys():
+                returnStack.append(inputs[symbol])
             else:
-                self.genome.functions[symbol](returnStack)
+                error = self.genome.functions[symbol][0](returnStack)
+                if error == 1:
+                    return "Error"
 
-        return returnStack
+        return returnStack[0]

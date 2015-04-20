@@ -7,12 +7,13 @@ from Gene import Gene
 
 class Environment(metaclass=abc.meta):
     def __init__(self):
-        self.chromosomes = []
+        self.population = []
 
         self.populationSize = 0
         self.headLength = 0
-        self.link = ""
+        self.homeotic = None
 
+        self.homeoticRate = 0 # multiplied by the other rates for every homeotic gene
         self.mutationRate = 0
         self.inversionRate = 0
         self.ISTranspositionRate = 0
@@ -36,7 +37,8 @@ class Environment(metaclass=abc.meta):
         pass
 
     def modify(self):
-        pass
+        for chromosome in self.population:
+            pass
 
     def printChromosomes(self):
         pass
