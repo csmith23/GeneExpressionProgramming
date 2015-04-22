@@ -187,7 +187,7 @@ class Chromosome():
                 return
 
             recombinationPoint = random.randint(0, len(sequence) - 1)
-            sequence[:recombinationPoint], otherSequence[recombinationPoint:] = otherSequence[:recombinationPoint], sequence[recombinationPoint:]
+            sequence[:recombinationPoint], otherSequence[:recombinationPoint] = otherSequence[:recombinationPoint], sequence[:recombinationPoint]
             for gene in self.genes:
                 gene.head = sequence[:len(gene.head)]
                 for i in range(len(gene.head)):
@@ -220,7 +220,7 @@ class Chromosome():
                 return
 
             recombinationPoint = random.randint(0, len(sequence) - 1)
-            sequence[:recombinationPoint], otherSequence[recombinationPoint:] = otherSequence[:recombinationPoint], sequence[recombinationPoint:]
+            sequence[:recombinationPoint], otherSequence[:recombinationPoint] = otherSequence[:recombinationPoint], sequence[:recombinationPoint]
             for homeotic in self.homeotics:
                 homeotic.head = sequence[:len(homeotic.head)]
                 for i in range(len(homeotic.head)):
@@ -254,7 +254,8 @@ class Chromosome():
 
             recombinationPoint = random.randint(0, len(sequence) - 1)
             otherPoint = random.randint(recombinationPoint, len(sequence) - 1)
-            sequence[:recombinationPoint], otherSequence[recombinationPoint:otherPoint], sequence[otherPoint:] = otherSequence[:recombinationPoint], sequence[recombinationPoint:otherPoint], sequence[otherPoint:]
+            sequence[:recombinationPoint], otherSequence[:recombinationPoint] = otherSequence[:recombinationPoint], sequence[:recombinationPoint]
+            sequence[otherPoint:], otherSequence[otherPoint:] = otherSequence[otherPoint:], sequence[otherPoint:]
             for gene in self.genes:
                 gene.head = sequence[:len(gene.head)]
                 for i in range(len(gene.head)):
@@ -288,7 +289,8 @@ class Chromosome():
 
             recombinationPoint = random.randint(0, len(sequence) - 1)
             otherPoint = random.randint(recombinationPoint, len(sequence) - 1)
-            sequence[:recombinationPoint], otherSequence[recombinationPoint:] = otherSequence[:recombinationPoint], sequence[recombinationPoint:]
+            sequence[:recombinationPoint], otherSequence[:recombinationPoint] = otherSequence[:recombinationPoint], sequence[:recombinationPoint]
+            sequence[otherPoint:], otherSequence[otherPoint:] = otherSequence[otherPoint:], sequence[otherPoint:]
             for homeotic in self.homeotics:
                 homeotic.head = sequence[:len(homeotic.head)]
                 for i in range(len(homeotic.head)):
@@ -307,13 +309,14 @@ class Chromosome():
                 for i in range(len(otherHomeotic.tail)):
                     otherSequence.pop(0)
 
-    def geneRecombination(self, rate, homeoticRate, otherGene):
+    def geneRecombination(self, rate, homeoticRate, otherChromosome):
         if random.random() < rate:
             if len(self.genes) != len(otherChromosome.genes):
                 return
             
             recombinationPoint = random.randint(0, len(self.genes) - 1)
-            self.genes[:recombinationPoint], otherChromosome.genes[recombinationPoint:] = otherChromosome.genes[:recombinationPoint], self.genes[recombinationPoint:]
+            print(recombinationPoint)
+            self.genes[:recombinationPoint], otherChromosome.genes[:recombinationPoint] = otherChromosome.genes[:recombinationPoint], self.genes[:recombinationPoint]
             
         rate *= homeoticRate
         if random.random() < rate:
@@ -321,7 +324,8 @@ class Chromosome():
                 return
             
             recombinationPoint = random.randint(0, len(self.homeotics) - 1)
-            self.homeotics[:recombinationPoint], otherChromosome.homeotics[recombinationPoint:] = otherChromosome.homeotics[:recombinationPoint], self.homeotics[recombinationPoint:]
+            print(recombinationPoint)
+            self.homeotics[:recombinationPoint], otherChromosome.homeotics[:recombinationPoint] = otherChromosome.homeotics[:recombinationPoint], self.homeotics[:recombinationPoint]
             
     def printChromosome(self):
         for gene in self.genes:
