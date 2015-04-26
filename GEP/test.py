@@ -167,10 +167,11 @@ __author__ = 'Coleman'
 from GEP.Gene import Gene
 from GEP.Genome import Genome
 from GEP.Chromosome import Chromosome
+from GEP.Environment import Environment
 
 genome = Genome()
-genome.functions.update(Genome.ARITHMETIC_SET)
-genome.terminals = ['a', 'b']
+genome.functions.update(Genome.BOOLEAN_SET)
+genome.terminals = ['a', 'b', 'c']
 
 # gene = Gene(genome, False)
 # gene.initRand(5, 0)
@@ -180,11 +181,64 @@ genome.terminals = ['a', 'b']
 # print(gene.tail)
 # print(gene.eval({terminal: value for (terminal, value) in list(zip(genome.terminals, [1, 2, 4]))}))
 
-chromosome = Chromosome()
-chromosome.initRand(3, 2, 5, genome)
-chromosome.printChromosome()
-print(end='\n\n\n')
-chromosome.geneTransposition(1, 1)
-chromosome.printChromosome()
-print(end='\n\n\n\n\n')
-print(chromosome.eval([0, 1]))
+# chromosome = Chromosome()
+# otherChromosome = Chromosome()
+# chromosome.initRand(3, 2, 5, genome)
+# otherChromosome.initRand(3, 2, 5, genome)
+# chromosome.printChromosome()
+# otherChromosome.printChromosome()
+# print(end='\n\n\n')
+# chromosome.geneRecombination(1, 1, otherChromosome)
+# chromosome.printChromosome()
+# otherChromosome.printChromosome()
+# print(end='\n\n\n\n\n')
+
+def my_fitness(actual, target, max=False):
+    if max:
+        return 8
+
+    if len(actual) != len(target):
+        return "Error"
+
+    fitness = 0
+    for i in range(len(actual)):
+        for output in actual[i]:
+            if output == "Error":
+                fitness = "Error"
+
+        if fitness == "Error":
+            fitness = 0
+            break
+
+        if actual[i] == target[i]:
+            fitness += 1
+
+    return fitness
+
+environment = Environment()
+environment.init(50, 3, 1, 5, 7, genome)
+environment.setRates(homeoticRate=0.5, mutationRate=0.1, inversionRate=0.05,
+                     ISTranspositionRate=0.025, RISTranspositionRate=0.5, geneTranspositionRate=0.05,
+                     onePointRecombinationRate=0.05, twoPointRecombinationRate=0.025, geneRecombinationRate=0.025)
+
+inputsOutputs = (
+    [[False, False, False],
+     [False, False, True],
+     [False, True, False],
+     [False, True, True],
+     [True, False, False],
+     [True, False, True],
+     [True, True, False],
+     [True, True, True]],
+
+    [[False],
+     [False],
+     [False],
+     [True],
+     [False],
+     [True],
+     [True],
+     [True]]
+)
+
+environment.run(inputsOutputs, my_fitness)

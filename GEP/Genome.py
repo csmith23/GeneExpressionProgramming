@@ -45,7 +45,7 @@ class Genome():
     def __init__(self):
         self.functions = {"arity": 0}
         self.terminals = []
-        self.homeoticTerminals = range(1)
+        self.genicTerminals = range(1)
 
     def symbols(self):
         symbols = self.functions.copy()
@@ -53,5 +53,5 @@ class Genome():
         for symbol in symbols.keys():
             symbols[symbol] = symbols[symbol][1]
 
-        symbols.update({terminal: 0 for terminal in self.terminals + list(self.homeoticTerminals)})
+        symbols.update({terminal: 0 for terminal in self.terminals + list(self.genicTerminals)})
         return symbols

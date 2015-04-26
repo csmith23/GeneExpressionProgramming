@@ -8,9 +8,10 @@ class Chromosome():
         self.genes = []
         self.homeotics = []
 
-    def initRand(self, numGenes, numHomeotics, headLength, genome):
+    def initRand(self, numGenes, numHomeotics, headLength, homeoticHeadLength, genome):
         self.genes = [Gene(genome, False).initRand(headLength, numGenes) for i in range(numGenes)]
-        self.homeotics = [Gene(genome, True).initRand(headLength, numGenes) for i in range(numHomeotics)]
+        self.homeotics = [Gene(genome, True).initRand(homeoticHeadLength, numGenes) for i in range(numHomeotics)]
+        return self
 
     def replicate(self):
         newGenes = []
@@ -130,10 +131,12 @@ class Chromosome():
             functions = list(gene.genome.functions.keys())
             functions.pop(functions.index("arity"))
             start = random.randint(0, len(sequence) - 1)
+
             while sequence[start] not in functions:
-                start += 1
                 if start == len(sequence) - 1:
                     break
+
+                start += 1
 
             stop = random.randint(start, start + headLength)
             RISSequence = sequence[start:stop + 1]
@@ -150,13 +153,14 @@ class Chromosome():
 
             homeotic = random.choice(self.homeotics)
             headLength = len(homeotic.head)
-            functions = list(gene.genome.functions.keys())
+            functions = list(homeotic.genome.functions.keys())
             functions.pop(functions.index("arity"))
             start = random.randint(0, len(sequence) - 1)
             while sequence[start] not in functions:
-                start += 1
                 if start == len(sequence) - 1:
                     break
+
+                start += 1
 
             stop = random.randint(start, start + headLength)
             RISSequence = sequence[start:stop + 1]
@@ -202,7 +206,7 @@ class Chromosome():
                 for i in range(len(otherGene.head)):
                     otherSequence.pop(0)
 
-                otherGene.tail = sequence[:len(otherGene.tail)]
+                otherGene.tail = otherSequence[:len(otherGene.tail)]
                 for i in range(len(otherGene.tail)):
                     otherSequence.pop(0)
 
@@ -235,7 +239,7 @@ class Chromosome():
                 for i in range(len(otherHomeotic.head)):
                     otherSequence.pop(0)
 
-                otherHomeotic.tail = sequence[:len(otherHomeotic.tail)]
+                otherHomeotic.tail = otherSequence[:len(otherHomeotic.tail)]
                 for i in range(len(otherHomeotic.tail)):
                     otherSequence.pop(0)
 
@@ -270,7 +274,7 @@ class Chromosome():
                 for i in range(len(otherGene.head)):
                     otherSequence.pop(0)
 
-                otherGene.tail = sequence[:len(otherGene.tail)]
+                otherGene.tail = otherSequence[:len(otherGene.tail)]
                 for i in range(len(otherGene.tail)):
                     otherSequence.pop(0)
 
@@ -305,7 +309,7 @@ class Chromosome():
                 for i in range(len(otherHomeotic.head)):
                     otherSequence.pop(0)
 
-                otherHomeotic.tail = sequence[:len(otherHomeotic.tail)]
+                otherHomeotic.tail = otherSequence[:len(otherHomeotic.tail)]
                 for i in range(len(otherHomeotic.tail)):
                     otherSequence.pop(0)
 
@@ -315,7 +319,6 @@ class Chromosome():
                 return
             
             recombinationPoint = random.randint(0, len(self.genes) - 1)
-            print(recombinationPoint)
             self.genes[:recombinationPoint], otherChromosome.genes[:recombinationPoint] = otherChromosome.genes[:recombinationPoint], self.genes[:recombinationPoint]
             
         rate *= homeoticRate
@@ -324,7 +327,6 @@ class Chromosome():
                 return
             
             recombinationPoint = random.randint(0, len(self.homeotics) - 1)
-            print(recombinationPoint)
             self.homeotics[:recombinationPoint], otherChromosome.homeotics[:recombinationPoint] = otherChromosome.homeotics[:recombinationPoint], self.homeotics[:recombinationPoint]
             
     def printChromosome(self):

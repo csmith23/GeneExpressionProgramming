@@ -15,13 +15,14 @@ class Gene():
         functions.pop(functions.index("arity"))
         if self.homeotic:
             terminals = list(range(numGenes))
-            if numGenes > list(self.genome.homeoticTerminals)[-1]:
-                self.genome.homeoticTerminals = range(numGenes)
+            if numGenes > list(self.genome.genicTerminals)[-1]:
+                self.genome.genicTerminals = range(numGenes)
         else:
             terminals = self.genome.terminals
 
         self.head = [random.choice(functions + terminals) for i in range(length)]
         self.tail = [random.choice(terminals) for i in range(length * (arity - 1) + 1)]
+        self.head[0] = random.choice(functions)
         return self
 
     def replicate(self):
