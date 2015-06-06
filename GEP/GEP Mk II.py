@@ -78,41 +78,51 @@ class Environment:
                     break
 
 class Chromosome:
-    def __init__(self, headLengths, homeoticLengths, genomes):
+    def __init__(self, headLengths, homeoticLengths, genomes, gen=True):
         self.fitness = 0
-        self.symbols = [genomes[i].symbols(len(headLengths), i) for i in range(len(genomes))]
-        self.genomes = genomes
+        self.terminals = None
+        self.symbols = None
+        self.genomes = None
 
-        terminals = [genomes[i].terminals for i in range(len(headLengths))]
-        homeoticTerminals = [list(range(len(headLengths))) for i in range(len(homeoticLengths))]
-        self.terminals = terminals + homeoticTerminals
+        self.headRanges = None
+        self.tailRanges = None
+        self.homeoticRanges = None
+        self.sequence = None
 
-        heads = [genomes[i].head(headLengths[i]) for i in range(len(headLengths))]
-        tails = [genomes[i].tail(headLengths[i]) for i in range(len(headLengths))]
-        homeotics = [genomes[i + len(headLengths)].homeotic(homeoticLengths[i], len(headLengths)) for i in range(len(homeoticLengths))]
-        homeoticTails = [genomes[i + len(headLengths)].homeoticTail(homeoticLengths[i], len(headLengths)) for i in range(len(homeoticLengths))]
-        self.headRanges = []
-        self.tailRanges = []
-        self.homeoticRanges = []
-        self.sequence = []
-        for i in range(len(heads)):
-            self.headRanges.append((len(self.sequence), len(self.sequence) + len(heads[i])))
-            self.tailRanges.append((len(self.sequence) + len(heads[i]), len(self.sequence) + len(heads[i]) + len(tails[i])))
-            self.homeoticRanges.append(False)
-            self.sequence += heads[i]
-            self.sequence += tails[i]
+        self.head = None
+        if gen:
+            terminals = [genomes[i].terminals for i in range(len(headLengths))]
+            homeoticTerminals = [list(range(len(headLengths))) for i in range(len(homeoticLengths))]
+            self.terminals = terminals + homeoticTerminals
+            self.symbols = [genomes[i].symbols(len(headLengths), i) for i in range(len(genomes))]
+            self.genomes = genomes
 
-        for i in range(len(homeotics)):
-            self.headRanges.append((len(self.sequence), len(self.sequence) + len(homeotics[i])))
-            self.tailRanges.append((len(self.sequence) + len(homeotics[i]), len(self.sequence) + len(homeotics[i]) + len(homeoticTails[i])))
-            self.homeoticRanges.append(True)
-            self.sequence += homeotics[i]
-            self.sequence += homeoticTails[i]
+            heads = [genomes[i].head(headLengths[i]) for i in range(len(headLengths))]
+            tails = [genomes[i].tail(headLengths[i]) for i in range(len(headLengths))]
+            homeotics = [genomes[i + len(headLengths)].homeotic(homeoticLengths[i], len(headLengths)) for i in range(len(homeoticLengths))]
+            homeoticTails = [genomes[i + len(headLengths)].homeoticTail(homeoticLengths[i], len(headLengths)) for i in range(len(homeoticLengths))]
+            self.headRanges = []
+            self.tailRanges = []
+            self.homeoticRanges = []
+            self.sequence = []
+            for i in range(len(heads)):
+                self.headRanges.append((len(self.sequence), len(self.sequence) + len(heads[i])))
+                self.tailRanges.append((len(self.sequence) + len(heads[i]), len(self.sequence) + len(heads[i]) + len(tails[i])))
+                self.homeoticRanges.append(False)
+                self.sequence += heads[i]
+                self.sequence += tails[i]
 
-        self.head = [False for i in range(len(self.sequence))]
-        for headRange in self.headRanges:
-            for i in range(headRange[0], headRange[1]):
-                self.head[i] = True
+            for i in range(len(homeotics)):
+                self.headRanges.append((len(self.sequence), len(self.sequence) + len(homeotics[i])))
+                self.tailRanges.append((len(self.sequence) + len(homeotics[i]), len(self.sequence) + len(homeotics[i]) + len(homeoticTails[i])))
+                self.homeoticRanges.append(True)
+                self.sequence += homeotics[i]
+                self.sequence += homeoticTails[i]
+
+            self.head = [False for i in range(len(self.sequence))]
+            for headRange in self.headRanges:
+                for i in range(headRange[0], headRange[1]):
+                    self.head[i] = True
 
     def eval(self, terminalInputs):
         genes = []
@@ -148,7 +158,7 @@ class Chromosome:
         return homeoticInputs
 
     def copy(self):
-        new = Chromosome([1], [1], self.genomes)
+        new = Chromosome(None, None, None, False)
         new.fitness = self.fitness
         new.genomes = self.genomes
         new.head = self.head
@@ -187,7 +197,24 @@ class Chromosome:
         self.sequence[start:end] = reversed(self.sequence[start:end])
 
     def ISTransposition(self):
-        pass
+        index = random.randint(0, len(self.headRanges) - 1)
+        start = random.randint(self.headRanges[index][0], self.tailRanges[index][1] - 1)
+        end = random.randint(start + 1, self.tailRanges[index][1])
+        sequence = self.sequence[start:end]
+        destIndex = 0
+        while True:
+            destIndex = random.randint(0, len(self.headRanges) - 1)
+            if self.homeoticRanges[index] is self.homeoticRanges[destIndex]:
+                break
+
+        destination = random.randint(self.headRanges[destIndex][0] + 1, self.headRanges[destIndex][1] - 1)
+        if self.headRanges[destIndex][1] - destination < end - start:
+            self.sequence[destination:self.headRanges[destIndex][1]] = sequence[:self.headRanges[destIndex][1] - destination]
+        else:
+            self.sequence[destination:destination + (end - start)] = sequence
+
+        print(start, end)
+        print(destination)
 
     def RISTransposition(self):
         pass
@@ -335,9 +362,5 @@ print(chromosome.homeoticRanges)
 print(chromosome.symbols)
 print(chromosome.head)
 print(chromosome.sequence)
-new = chromosome.copy()
-chromosome.inversion()
+chromosome.ISTransposition()
 print(chromosome.sequence)
-new.inversion()
-print(chromosome.sequence)
-print(new.sequence)
