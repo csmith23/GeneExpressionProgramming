@@ -34,7 +34,48 @@ class Environment:
         pass
 
     def alter(self):
-        pass
+        for chromosome in self.population:
+            chromosome.mutation(self.mutationRate)
+
+        random.shuffle(self.population)
+        for chromosome in self.population[:int(round(self.populationSize * self.inversionRate))]:
+            chromosome.inversion()
+
+        random.shuffle(self.population)
+        for chromosome in self.population[:int(round(self.populationSize * self.ISTranspositionRate))]:
+            chromosome.ISTransposition()
+
+        random.shuffle(self.population)
+        for chromosome in self.population[:int(round(self.populationSize * self.RISTranspositionRate))]:
+            chromosome.RISTranspoisition()
+
+        random.shuffle(self.population)
+        for chromosome in self.population[:int(round(self.populationSize * self.geneTranspositionRate))]:
+            chromosome.geneTransposition()
+
+        random.shuffle(self.population)
+        for chromosome in self.population[:int(round(self.populationSize * self.onePointRecombinationRate))]:
+            while True:
+                other = random.choice(self.population)
+                if random is not chromosome:
+                    chromosome.onePointRecombination()
+                    break
+
+        random.shuffle(self.population)
+        for chromosome in self.population[:int(round(self.populationSize * self.twoPointRecombinationRate))]:
+            while True:
+                other = random.choice(self.population)
+                if random is not chromosome:
+                    chromosome.twoPointRecombination()
+                    break
+
+        random.shuffle(self.population)
+        for chromosome in self.population[:int(round(self.populationSize * self.geneRecombinationRate))]:
+            while True:
+                other = random.choice(self.population)
+                if random is not chromosome:
+                    chromosome.genePointRecombination()
+                    break
 
 class Chromosome:
     def __init__(self, headLengths, homeoticLengths, genomes):
@@ -106,6 +147,19 @@ class Chromosome:
 
         return homeoticInputs
 
+    def copy(self):
+        new = Chromosome([1], [1], self.genomes)
+        new.fitness = self.fitness
+        new.genomes = self.genomes
+        new.head = self.head
+        new.headRanges = self.headRanges
+        new.tailRanges = self.tailRanges
+        new.homeoticRanges = self.homeoticRanges
+        new.sequence = self.sequence[:]
+        new.symbols = self.symbols
+        new.terminals = self.terminals
+        return new
+
     def mutation(self, rate):
         indices = []
         for index in range(len(self.headRanges)):
@@ -129,6 +183,7 @@ class Chromosome:
         index = random.randint(0, len(self.headRanges) - 1)
         start = random.randint(self.headRanges[index][0], self.headRanges[index][1] - 1)
         end = random.randint(start + 1, self.headRanges[index][1])
+        print(start, end)
         self.sequence[start:end] = reversed(self.sequence[start:end])
 
     def ISTransposition(self):
@@ -140,13 +195,13 @@ class Chromosome:
     def geneTransposition(self):
         pass
 
-    def onePointRecombination(self):
+    def onePointRecombination(self, other):
         pass
 
-    def twoPointRecombination(self):
+    def twoPointRecombination(self, other):
         pass
 
-    def geneRecombination(self):
+    def geneRecombination(self, other):
         pass
 
 class Genome:
@@ -280,8 +335,9 @@ print(chromosome.homeoticRanges)
 print(chromosome.symbols)
 print(chromosome.head)
 print(chromosome.sequence)
-# chromosome.mutation(1/4)
+new = chromosome.copy()
 chromosome.inversion()
 print(chromosome.sequence)
-output = chromosome.eval([True, False])
-print(output)
+new.inversion()
+print(chromosome.sequence)
+print(new.sequence)
