@@ -4,6 +4,10 @@ import random
 import math
 import sys
 
+class fitnessFunction:
+    def __init__():
+        self.function
+
 class Environment:
     def __init__(self, populationSize, mutationRate=0, inversionRate=0, ISTranspositionRate=0, RISTranspositionRate=0, geneTranspositionRate=0, onePointRecombinationRate=0, twoPointRecombinationRate=0, geneRecombinationRate=0):
         self.population = []
@@ -21,12 +25,36 @@ class Environment:
         for i in range(self.populationSize):
             self.population.append(Chromosome(headLengths, homeoticLengths, genomes))
 
-    def run(self, fitness):
+    def run(self, fitness, inputs, times=False):
+        index = None
+        generation = -1
         while True:
-            # calculate fitness
+            if isinstance(times, int):
+                if generation > times:
+                    bestIndex = 0
+                    best = 0
+                    for i in range(self.populationSize):
+                        if self.population[i] > best:
+                            bestIndex = i
+
+                    index = bestIndex
+                    break
+
+            generation += 1
+            for i in range(self.populationSize):
+                chromosome = self.population[i]
+                fitness(chromosome, inputs)
+                if chromosome.fitness == fitness(None, None, True):
+                    index = i
+                    break
+
             self.reproduce(self.select())
             self.alter()
-            self.print()
+            self.print(generation)
+
+        print(self.population[index].sequence, end=":")
+        print(self.population[index].fitness)
+
 
     def select(self):
         wheel = []
@@ -93,12 +121,13 @@ class Environment:
                     break
 
     def print(self):
-        pass
+        for chromosome in self.population:
+            print(chromosome.sequence, end=":")
+            print(chromosome.fitness)
 
 class Chromosome:
     def __init__(self, headLengths, homeoticLengths, genomes, gen=True):
         self.fitness = 0
-        # self.terminals = None
         self.symbols = None
         self.genomes = None
 
@@ -109,9 +138,6 @@ class Chromosome:
 
         self.head = None
         if gen:
-            # terminals = [genomes[0].terminals for i in range(len(headLengths))]
-            # homeoticTerminals = [list(range(len(headLengths))) for i in range(len(homeoticLengths))]
-            # self.terminals = terminals + homeoticTerminals
             self.symbols = [genomes[0].symbols(len(headLengths), False)]
             self.symbols.append(genomes[1].symbols(len(headLengths), True))
             self.genomes = genomes
@@ -157,9 +183,11 @@ class Chromosome:
             gene = genes[index][0]
             if isinstance(gene[0], int):
                 node = Node(gene[0], 0)
+
             else:
                 if genes[index][1]:
                     node = Node(gene[0], self.genomes[1].arities[gene[0]])
+
                 else:
                     node = Node(gene[0], self.genomes[0].arities[gene[0]])
 
@@ -167,9 +195,11 @@ class Chromosome:
             for symbol in gene[1:]:
                 if isinstance(symbol, int):
                     node.append(symbol, 0)
+
                 else:
                     if genes[index][1]:
                         node.append(symbol, self.genomes[1].arities[symbol])
+
                     else:
                         node.append(symbol, self.genomes[0].arities[symbol])
 
@@ -177,6 +207,7 @@ class Chromosome:
         for index in range(len(trees)):
             if trees[index][1]:
                 homeoticInputs[index] = trees[index][0].eval(self.genomes[1], homeoticInputs)
+
             else:
                 homeoticInputs[index] = trees[index][0].eval(self.genomes[0], inputs[index])
 
@@ -205,6 +236,7 @@ class Chromosome:
             if self.head[index[0]]:
                 if self.homeoticRanges[index[0]]:
                     symbols = self.symbols[1][0] + self.symbols[1][1]
+
                 else:
                     symbols = self.symbols[0][0] + self.symbols[0][1]
 
@@ -215,6 +247,7 @@ class Chromosome:
             else:
                 if self.homeoticRanges[index[0]]:
                     symbols = self.symbols[1][1][:]
+
                 else:
                     symbols = self.symbols[0][1][:]
 
@@ -349,22 +382,25 @@ class Genome:
     def _add(inputs):
         if inputs[0] == "Error" or inputs[1] == "Error":
             return "Error"
+
         return inputs[0] + inputs[1]
     def _sub(inputs):
         if inputs[0] == "Error" or inputs[1] == "Error":
             return "Error"
+
         return inputs[0] - inputs[1]
     def _mul(inputs):
         if inputs[0] == "Error" or inputs[1] == "Error":
             return "Error"
+
         return inputs[0] * inputs[1]
     def _div(inputs):
         if inputs[0] == "Error" or inputs[1] == "Error":
             return "Error"
         elif inputs[1] != 0:
             return inputs[0] / inputs[1]
-        else:
-            return "Error"
+
+        return "Error"
 
     def _NOT(inputs):
         return not inputs[0]
@@ -384,7 +420,6 @@ class Genome:
 
     def _exp(inputs):
         return 2 ** inputs[0]
-
     def _log(inputs):
         return math.log(inputs[0], 2)
 
@@ -404,6 +439,7 @@ class Node:
         if len(self.children) < self.arity:
             self.children.append(Node(symbol, arity))
             return True
+
         else:
             for child in self.children:
                 if child.append(symbol, arity):
@@ -422,6 +458,33 @@ class Node:
         return terminalInputs[self.symbol]
 
 
+
+def fitness(chromosome, inputs, max=False):
+    if max:
+        return 8
+
+    if len(inputs) > 8:
+        return "Error"
+
+    targets = [[False],
+               [False],
+               [False],
+               [True],
+               [False],
+               [True],
+               [True],
+               [True]]
+
+    chromosome.fitness = 0
+    outputs = []
+    for input in inputs:
+        output = chromosome.eval(input)
+        outputs.append(output[index] for index in list(output.keys()))
+
+    for i in range(len(targets)):
+        if targets[i] == outputs[i]:
+            chromosome.fitness += 1
+
 genome = Genome()
 genome.addFunction("A", Genome._AND, 2)
 genome.addFunction("O", Genome._OR, 2)
@@ -436,4 +499,15 @@ print(chromosome.homeoticRanges)
 print(chromosome.symbols)
 print(chromosome.head)
 print(chromosome.sequence)
-print(chromosome.eval([True, False]))
+results = chromosome.eval([True, False])
+print(results)
+print(list(results.keys()))
+
+
+
+genome = Genome()
+genome.addFunction("+", Genome._add, 2)
+genome.addFunction("-", Genome._sub, 2)
+genome.addFunction("*", Genome._mul, 2)
+genome.addFunction("/", Genome._div, 2)
+genome.addTerminal("x")
