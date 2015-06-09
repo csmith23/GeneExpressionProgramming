@@ -285,8 +285,7 @@ class Chromosome:
             destIndex = random.randrange(len(self.headRanges))
             if self.homeoticRanges[index] is self.homeoticRanges[destIndex]:
                 if self.headRanges[index][1] - self.headRanges[index][0] == self.headRanges[destIndex][1] - self.headRanges[destIndex][0]:
-                    if self.tailRanges[index][1] - self.tailRanges[index][0] == self.tailRanges[destIndex][1] - self.tailRanges[destIndex][0]:
-                        break
+                    break
 
         self.sequence[self.headRanges[destIndex][0]:self.tailRanges[destIndex][1]] = self.sequence[self.headRanges[index][0]:self.tailRanges[index][1]]
 
@@ -429,120 +428,12 @@ genome.addFunction("O", Genome._OR, 2)
 genome.addFunction("N", Genome._NOT, 1)
 genome.addTerminal("a")
 genome.addTerminal("b")
-chromosome = Chromosome([2, 2, 2], [], [genome, genome])
-other = Chromosome([2, 2, 2], [], [genome, genome])
+chromosome = Chromosome([2, 3, 4], [], [genome, genome])
+other = Chromosome([2, 3, 4], [], [genome, genome])
 print(chromosome.headRanges)
 print(chromosome.tailRanges)
 print(chromosome.homeoticRanges)
 print(chromosome.symbols)
 print(chromosome.head)
-print(chromosome.sequence, end="\n\n")
-
-print(other.headRanges)
-print(other.tailRanges)
-print(other.homeoticRanges)
-print(other.symbols)
-print(other.head)
-print(other.sequence, end="\n\n")
-
-print([chr(i + 48) for i in range(len(chromosome.sequence))])
 print(chromosome.sequence)
-print(other.sequence)
-chromosome.geneRecombination(other)
-print(chromosome.sequence)
-print(other.sequence)
-# print(chromosome.eval([True, False]))
-
-
-
-# if separate genomes are used for each gene
-#
-#
-#
-# class Chromosome:
-#     def __init__(self, headLengths, homeoticLengths, genomes, gen=True):
-#         self.fitness = 0
-#         self.terminals = None
-#         self.symbols = None
-#         self.genomes = None
-#
-#         self.headRanges = None
-#         self.tailRanges = None
-#         self.homeoticRanges = None
-#         self.sequence = None
-#
-#         self.head = None
-#         if gen:
-#             terminals = [genomes[i].terminals for i in range(len(headLengths))]
-#             homeoticTerminals = [list(range(len(headLengths))) for i in range(len(homeoticLengths))]
-#             self.terminals = terminals + homeoticTerminals
-#             self.symbols = [genomes[i].symbols(len(headLengths), i) for i in range(len(genomes))]
-#             self.genomes = genomes
-#
-#             heads = [genomes[i].head(headLengths[i]) for i in range(len(headLengths))]
-#             tails = [genomes[i].tail(headLengths[i]) for i in range(len(headLengths))]
-#             homeotics = [genomes[i + len(headLengths)].homeotic(homeoticLengths[i], len(headLengths)) for i in range(len(homeoticLengths))]
-#             homeoticTails = [genomes[i + len(headLengths)].homeoticTail(homeoticLengths[i], len(headLengths)) for i in range(len(homeoticLengths))]
-#             self.headRanges = []
-#             self.tailRanges = []
-#             self.homeoticRanges = []
-#             self.sequence = []
-#             for i in range(len(heads)):
-#                 self.headRanges.append((len(self.sequence), len(self.sequence) + len(heads[i])))
-#                 self.tailRanges.append((len(self.sequence) + len(heads[i]), len(self.sequence) + len(heads[i]) + len(tails[i])))
-#                 self.homeoticRanges.append(False)
-#                 self.sequence += heads[i]
-#                 self.sequence += tails[i]
-#
-#             for i in range(len(homeotics)):
-#                 self.headRanges.append((len(self.sequence), len(self.sequence) + len(homeotics[i])))
-#                 self.tailRanges.append((len(self.sequence) + len(homeotics[i]), len(self.sequence) + len(homeotics[i]) + len(homeoticTails[i])))
-#                 self.homeoticRanges.append(True)
-#                 self.sequence += homeotics[i]
-#                 self.sequence += homeoticTails[i]
-#
-#             self.head = [False for i in range(len(self.sequence))]
-#             for headRange in self.headRanges:
-#                 for i in range(headRange[0], headRange[1]):
-#                     self.head[i] = True
-
-# class Genome:
-#     def __init__(self):
-#         self.functions = {}
-#         self.arities = {}
-#         self.terminals = []
-#         self.arity = 0
-#
-#     def addFunction(self, symbol, function, arity):
-#         self.functions[symbol] = function
-#         self.arities[symbol] = arity
-#         if arity > self.arity:
-#             self.arity = arity
-#
-#     def addTerminal(self, symbol):
-#         self.terminals.append(symbol)
-#         self.arities[symbol] = 0
-#
-#     def head(self, length):
-#         head = [random.choice(list(self.functions.keys()) + self.terminals) for i in range(length)]
-#         head[0] = random.choice(list(self.functions.keys()))
-#         return head
-#
-#     def tail(self, length):
-#         tail = [random.choice(self.terminals) for i in range(length * (self.arity - 1) + 1)]
-#         return tail
-#
-#     def homeotic(self, length, numGenes):
-#         homeotic = [random.choice(list(self.functions.keys()) + list(range(numGenes))) for i in range(length)]
-#         homeotic[0] = random.choice(list(self.functions.keys()))
-#         return homeotic
-#
-#     def homeoticTail(self, length, numGenes):
-#         tail = [random.choice(list(range(numGenes))) for i in range(length * (self.arity - 1) + 1)]
-#         return tail
-#
-#     def symbols(self, numGenes, index):
-#         if index > numGenes - 1:
-#             return (list(self.functions.keys()), list(range(numGenes)))
-#
-#         return (list(self.functions.keys()), self.terminals)
+print(chromosome.eval([True, False]))
