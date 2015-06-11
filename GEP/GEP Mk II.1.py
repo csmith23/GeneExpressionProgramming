@@ -4,12 +4,8 @@ import random
 import math
 import sys
 
-class fitnessFunction:
-    def __init__():
-        self.function
-
 class Environment:
-    def __init__(self, populationSize, mutationRate=0, inversionRate=0, ISTranspositionRate=0, RISTranspositionRate=0, geneTranspositionRate=0, onePointRecombinationRate=0, twoPointRecombinationRate=0, geneRecombinationRate=0):
+    def __init__(self, populationSize, mutationRate=0.0, inversionRate=0.0, ISTranspositionRate=0.0, RISTranspositionRate=0.0, geneTranspositionRate=0.0, onePointRecombinationRate=0.0, twoPointRecombinationRate=0.0, geneRecombinationRate=0.0):
         self.population = []
         self.populationSize = populationSize
         self.mutationRate = mutationRate
@@ -25,49 +21,64 @@ class Environment:
         for i in range(self.populationSize):
             self.population.append(Chromosome(headLengths, homeoticLengths, genomes))
 
-    def run(self, fitness, inputs, times=False):
+    def run(self, fitness, inputs, times=float("Inf")):
         index = None
         generation = -1
+        found = False
+        best = 0
         while True:
-            if isinstance(times, int):
-                if generation > times:
-                    bestIndex = 0
-                    best = 0
-                    for i in range(self.populationSize):
-                        if self.population[i] > best:
-                            bestIndex = i
-
-                    index = bestIndex
-                    break
-
             generation += 1
+            if generation > times:
+                for i in range(self.populationSize):
+                    if self.population[i].fitness > best:
+                        best = self.population[i].fitness
+
+                break
+
             for i in range(self.populationSize):
                 chromosome = self.population[i]
                 fitness(chromosome, inputs)
                 if chromosome.fitness == fitness(None, None, True):
-                    index = i
-                    break
+                    found = True
 
+            if found:
+                break
+
+            self.print(generation)
             self.reproduce(self.select())
             self.alter()
-            self.print(generation)
 
-        print(self.population[index].sequence, end=":")
-        print(self.population[index].fitness)
+        if best == 0:
+            best = fitness(None, None, True)
 
+        for index in range(self.populationSize):
+            if self.population[index].fitness == best:
+                print(generation, end=".")
+                print(index, end=" - ")
+                print(self.population[index].sequence, end=":")
+                print(self.population[index].fitness)
 
     def select(self):
         wheel = []
+        bestIndices = []
+        bestFitness = 0
         for index in range(self.populationSize):
+            chromosome = self.population[index]
+            if chromosome.fitness > bestFitness:
+                bestIndices = [index]
+
+            elif chromosome.fitness == bestFitness:
+                bestIndices.append(index)
+
             for i in range(chromosome.fitness):
                 wheel.append(index)
 
         indices = []
-        for i in range(self.populationSize):
+        for i in range(self.populationSize - len(bestIndices)):
             index = random.randrange(len(wheel))
             indices.append(wheel[index])
 
-        return indices
+        return indices + bestIndices
 
     def reproduce(self, indices):
         newPopulation = []
@@ -90,40 +101,37 @@ class Environment:
 
         random.shuffle(self.population)
         for chromosome in self.population[:int(round(self.populationSize * self.RISTranspositionRate))]:
-            chromosome.RISTranspoisition()
+            chromosome.RISTransposition()
 
         random.shuffle(self.population)
         for chromosome in self.population[:int(round(self.populationSize * self.geneTranspositionRate))]:
             chromosome.geneTransposition()
 
         random.shuffle(self.population)
-        for chromosome in self.population[:int(round(self.populationSize * self.onePointRecombinationRate))]:
-            while True:
-                other = random.choice(self.population)
-                if random is not chromosome:
-                    chromosome.onePointRecombination()
-                    break
+        for index in range(0, int(round(self.populationSize * self.onePointRecombinationRate)), 2):
+            chromosome = self.population[index]
+            other = self.population[index + 1]
+            chromosome.onePointRecombination(other)
 
         random.shuffle(self.population)
-        for chromosome in self.population[:int(round(self.populationSize * self.twoPointRecombinationRate))]:
-            while True:
-                other = random.choice(self.population)
-                if random is not chromosome:
-                    chromosome.twoPointRecombination()
-                    break
+        for index in range(0, int(round(self.populationSize * self.twoPointRecombinationRate)), 2):
+            chromosome = self.population[index]
+            other = self.population[index + 1]
+            chromosome.twoPointRecombination(other)
 
         random.shuffle(self.population)
-        for chromosome in self.population[:int(round(self.populationSize * self.geneRecombinationRate))]:
-            while True:
-                other = random.choice(self.population)
-                if random is not chromosome:
-                    chromosome.genePointRecombination()
-                    break
+        for index in range(0, int(round(self.populationSize * self.geneRecombinationRate)), 2):
+            chromosome = self.population[index]
+            other = self.population[index + 1]
+            chromosome.geneRecombination(other)
 
-    def print(self):
-        for chromosome in self.population:
-            print(chromosome.sequence, end=":")
-            print(chromosome.fitness)
+    def print(self, generation):
+        for i in range(self.populationSize):
+            chromosome = self.population[i]
+            print(generation, end=".")
+            print("%03d" % i, end=":")
+            print(chromosome.fitness, end=" - ")
+            print(chromosome.sequence)
 
 class Chromosome:
     def __init__(self, headLengths, homeoticLengths, genomes, gen=True):
@@ -234,26 +242,22 @@ class Chromosome:
         indices = indices[:int(round(rate * len(indices)))]
         for index in indices:
             if self.head[index[0]]:
-                if self.homeoticRanges[index[0]]:
+                if self.homeoticRanges[index[1]]:
                     symbols = self.symbols[1][0] + self.symbols[1][1]
 
                 else:
                     symbols = self.symbols[0][0] + self.symbols[0][1]
 
-                symbols.remove(self.sequence[index[0]])
-                if len(symbols) > 0:
-                    self.sequence[index[0]] = random.choice(symbols)
-
             else:
-                if self.homeoticRanges[index[0]]:
+                if self.homeoticRanges[index[1]]:
                     symbols = self.symbols[1][1][:]
 
                 else:
                     symbols = self.symbols[0][1][:]
 
-                symbols.remove(self.sequence[index[0]])
-                if len(symbols) > 0:
-                    self.sequence[index[0]] = random.choice(symbols)
+            symbols.remove(self.sequence[index[0]])
+            if len(symbols) > 0:
+                self.sequence[index[0]] = random.choice(symbols)
 
     def inversion(self):
         index = random.randrange(len(self.headRanges))
@@ -278,25 +282,24 @@ class Chromosome:
         self.sequence[destination:self.headRanges[destIndex][1]] = sequence[:self.headRanges[destIndex][1] - destination]
 
     def RISTransposition(self, tries=0):
-        if tries > sys.getrecursionlimit() - 5:
+        if tries > sys.getrecursionlimit() - 15:
             return
 
         index = random.randrange(len(self.headRanges))
-        start = random.randrange(self.headRanges[index][0], self.headRanges[index][1])
-        for i in range(start, self.headRanges[index][1]):
+        begin = random.randrange(self.headRanges[index][0], self.headRanges[index][1])
+        start = None
+        for i in range(begin, self.headRanges[index][1]):
             if self.homeoticRanges[index]:
                 if self.sequence[i] in self.symbols[1][0]:
                     start = i
-                    if self.sequence[i] not in self.symbols[1][0]:
-                        self.RISTransposition(tries + 1)
-                        return
 
             else:
                 if self.sequence[i] in self.symbols[0][0]:
                     start = i
-                    if self.sequence[i] not in self.symbols[0][0]:
-                        self.RISTransposition(tries + 1)
-                        return
+
+        if start is None:
+            self.RISTransposition(tries + 1)
+            return
 
         end = random.randint(start + 1, self.tailRanges[index][1])
         sequence = self.sequence[start:end]
@@ -466,20 +469,20 @@ def fitness(chromosome, inputs, max=False):
     if len(inputs) > 8:
         return "Error"
 
-    targets = [[False],
-               [False],
-               [False],
-               [True],
-               [False],
-               [True],
-               [True],
-               [True]]
+    targets = [False,
+               False,
+               False,
+               True,
+               False,
+               True,
+               True,
+               True]
 
     chromosome.fitness = 0
     outputs = []
-    for input in inputs:
-        output = chromosome.eval(input)
-        outputs.append(output[index] for index in list(output.keys()))
+    for terminalInputs in inputs:
+        output = chromosome.eval(terminalInputs)
+        outputs.append(output[len(list(output.keys())) - 1])
 
     for i in range(len(targets)):
         if targets[i] == outputs[i]:
@@ -491,23 +494,39 @@ genome.addFunction("O", Genome._OR, 2)
 genome.addFunction("N", Genome._NOT, 1)
 genome.addTerminal("a")
 genome.addTerminal("b")
-chromosome = Chromosome([2, 3, 4], [], [genome, genome])
-other = Chromosome([2, 3, 4], [], [genome, genome])
-print(chromosome.headRanges)
-print(chromosome.tailRanges)
-print(chromosome.homeoticRanges)
-print(chromosome.symbols)
-print(chromosome.head)
-print(chromosome.sequence)
-results = chromosome.eval([True, False])
-print(results)
-print(list(results.keys()))
+genome.addTerminal("c")
+# chromosome = Chromosome([2, 3, 4], [], [genome, genome])
+# other = Chromosome([2, 3, 4], [], [genome, genome])
+# print(chromosome.headRanges)
+# print(chromosome.tailRanges)
+# print(chromosome.homeoticRanges)
+# print(chromosome.symbols)
+# print(chromosome.head)
+# print(chromosome.sequence)
+# results = chromosome.eval([True, False])
+# print(results)
+# print(list(results.keys()))
 
 
 
-genome = Genome()
-genome.addFunction("+", Genome._add, 2)
-genome.addFunction("-", Genome._sub, 2)
-genome.addFunction("*", Genome._mul, 2)
-genome.addFunction("/", Genome._div, 2)
-genome.addTerminal("x")
+# genome = Genome()
+# genome.addFunction("+", Genome._add, 2)
+# genome.addFunction("-", Genome._sub, 2)
+# genome.addFunction("*", Genome._mul, 2)
+# genome.addFunction("/", Genome._div, 2)
+# genome.addTerminal("x")
+
+
+
+inputs = [[False, False, False],
+          [False, False, True],
+          [False, True, False],
+          [False, True, True],
+          [True, False, False],
+          [True, False, True],
+          [True, True, False],
+          [True, True, True]]
+
+simulation = Environment(20, mutationRate=1/15, inversionRate=0.05, ISTranspositionRate=0.15, RISTranspositionRate=0.2, geneTranspositionRate=.3, onePointRecombinationRate=.05, twoPointRecombinationRate=.1, geneRecombinationRate=.2)
+simulation.init([7], [], [genome, genome])
+simulation.run(fitness, inputs)
