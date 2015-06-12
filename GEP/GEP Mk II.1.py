@@ -41,10 +41,10 @@ class Environment:
                 if chromosome.fitness == fitness(None, None, True):
                     found = True
 
+            self.print(generation)
             if found:
                 break
-
-            self.print(generation)
+            
             self.reproduce(self.select())
             self.alter()
 
