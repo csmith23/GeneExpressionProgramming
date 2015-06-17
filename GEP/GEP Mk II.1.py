@@ -21,8 +21,7 @@ class Environment:
         for i in range(self.populationSize):
             self.population.append(Chromosome(headLengths, homeoticLengths, genomes))
 
-    def run(self, fitness, inputs, times=float("Inf")):
-        index = None
+    def run(self, fitness, times=float("Inf")):
         generation = -1
         found = False
         best = 0
@@ -37,19 +36,19 @@ class Environment:
 
             for i in range(self.populationSize):
                 chromosome = self.population[i]
-                fitness(chromosome, inputs)
-                if chromosome.fitness == fitness(None, None, True):
+                fitness(chromosome)
+                if chromosome.fitness == fitness(None, True):
                     found = True
 
             self.print(generation)
             if found:
                 break
-            
+
             self.reproduce(self.select())
             self.alter()
 
         if best == 0:
-            best = fitness(None, None, True)
+            best = fitness(None, True)
 
         for index in range(self.populationSize):
             if self.population[index].fitness == best:
@@ -177,7 +176,7 @@ class Chromosome:
                 for i in range(headRange[0], headRange[1]):
                     self.head[i] = True
 
-    def eval(self, terminalInputs):
+    def eval(self, terminalInputs, getRoot=False):
         genes = []
         for headRange, tailRange, homeoticRange in zip(self.headRanges, self.tailRanges, self.homeoticRanges):
             genes.append((self.sequence[headRange[0]:tailRange[1]], homeoticRange))
@@ -218,6 +217,9 @@ class Chromosome:
 
             else:
                 homeoticInputs[index] = trees[index][0].eval(self.genomes[0], inputs[index])
+
+        if getRoot:
+            homeoticInputs["Source"] = trees[0][0]
 
         return homeoticInputs
 
@@ -438,12 +440,19 @@ class Node:
         self.symbol = symbol
         self.arity = arity
 
-    def append(self, symbol, arity):
+    def append(self, symbol, arity, force=True):
         if len(self.children) < self.arity:
             self.children.append(Node(symbol, arity))
             return True
 
+        elif not force:
+            return False
+
         else:
+            for child in self.children:
+                if child.append(symbol, arity, False):
+                    return True
+
             for child in self.children:
                 if child.append(symbol, arity):
                     return True
@@ -460,14 +469,25 @@ class Node:
 
         return terminalInputs[self.symbol]
 
+    def traverse(self, level=0):
+        print(self.symbol, self.arity, level)
+        for child in self.children:
+            child.traverse(level + 1)
 
 
-def fitness(chromosome, inputs, max=False):
+
+def fitnessMax(chromosome, max=False):
     if max:
         return 8
 
-    if len(inputs) > 8:
-        return "Error"
+    inputs = [[False, False, False],
+              [False, False, True],
+              [False, True, False],
+              [False, True, True],
+              [True, False, False],
+              [True, False, True],
+              [True, True, False],
+              [True, True, True]]
 
     targets = [False,
                False,
@@ -488,13 +508,72 @@ def fitness(chromosome, inputs, max=False):
         if targets[i] == outputs[i]:
             chromosome.fitness += 1
 
+def fitnessXor(chromosome, max=False):
+    if max:
+        return 4
+
+    inputs = [[False, False],
+              [False, True],
+              [True, False],
+              [True, True]]
+
+    targets = [True,
+               False,
+               False,
+               True]
+
+    chromosome.fitness = 0
+    outputs = []
+    for terminalInputs in inputs:
+        output = chromosome.eval(terminalInputs)
+        outputs.append(output[len(list(output.keys())) - 1])
+
+    for i in range(len(targets)):
+        if targets[i] == outputs[i]:
+            chromosome.fitness += 1
+
+def fitnessParity(chromosome, max=False):
+    if max:
+        return 8
+
+    inputs = [[False, False, False],
+              [False, False, True],
+              [False, True, False],
+              [False, True, True],
+              [True, False, False],
+              [True, False, True],
+              [True, True, False],
+              [True, True, True]]
+
+    targets = [False,
+               True,
+               True,
+               False,
+               True,
+               False,
+               False,
+               True]
+
+    chromosome.fitness = 0
+    outputs = []
+    for terminalInputs in inputs:
+        output = chromosome.eval(terminalInputs)
+        outputs.append(output[len(list(output.keys())) - 1])
+
+    for i in range(len(targets)):
+        if targets[i] == outputs[i]:
+            chromosome.fitness += 1
+
 genome = Genome()
 genome.addFunction("A", Genome._AND, 2)
 genome.addFunction("O", Genome._OR, 2)
 genome.addFunction("N", Genome._NOT, 1)
+genome.addFunction("X", Genome._XOR, 2)
 genome.addTerminal("a")
 genome.addTerminal("b")
 genome.addTerminal("c")
+
+
 # chromosome = Chromosome([2, 3, 4], [], [genome, genome])
 # other = Chromosome([2, 3, 4], [], [genome, genome])
 # print(chromosome.headRanges)
@@ -516,17 +595,13 @@ genome.addTerminal("c")
 # genome.addFunction("/", Genome._div, 2)
 # genome.addTerminal("x")
 
+# chromosome = Chromosome([7], [], [genome, genome])
+# chromosome.sequence = ['X', 'b', 'A', 'N', 'O', 'X', 'N', 'c', 'a', 'c', 'a', 'b', 'b', 'c', 'c']
+# chromosome.sequence = ['X', 'A', 'X', 'c', 'O', 'O', 'b', 'a', 'a', 'a', 'c', 'a', 'c', 'a', 'b']
+# chromosome.sequence = ['X', 'X', 'a', 'X', 'a', 'X', 'c', 'a', 'b', 'c', 'b', 'c', 'a', 'a', 'a']
+# outputs = chromosome.eval([False, False, False], True)
+# outputs["Source"].traverse()
 
-
-inputs = [[False, False, False],
-          [False, False, True],
-          [False, True, False],
-          [False, True, True],
-          [True, False, False],
-          [True, False, True],
-          [True, True, False],
-          [True, True, True]]
-
-simulation = Environment(20, mutationRate=1/15, inversionRate=0.05, ISTranspositionRate=0.15, RISTranspositionRate=0.2, geneTranspositionRate=.3, onePointRecombinationRate=.05, twoPointRecombinationRate=.1, geneRecombinationRate=.2)
+simulation = Environment(100, mutationRate=1/38, inversionRate=0.05, ISTranspositionRate=0.15, RISTranspositionRate=0.2, geneTranspositionRate=.3, onePointRecombinationRate=.05, twoPointRecombinationRate=.1, geneRecombinationRate=.2)
 simulation.init([7], [], [genome, genome])
-simulation.run(fitness, inputs)
+simulation.run(fitnessParity)
