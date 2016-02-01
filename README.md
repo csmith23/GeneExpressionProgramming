@@ -21,3 +21,8 @@ It should have all of the inputs and desired outputs allready builtin, or if bei
 unsupervised setting, be able to access the members of the organism that it requires to properly rate it.
 It will be called every round, being passed an organism, and if the organism requires other members to
 be tested properly, it should be of a subclass of the Chromosome class.
+It can also be passed another value whose default value should be False, and when it is True,
+the environment is asking for the maximum fitness value an organism can have.
+If in an unsupervised setting, then the function should return a value nearing infinity or that is unreachable,
+otherwise the simulation may preemptively stop. In unsupervised cases, the fitness function should have the power
+to stop the program from running by calling exit(), based on any parameter that it has access to.
