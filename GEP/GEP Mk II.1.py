@@ -146,13 +146,13 @@ class Chromosome:
         self.head = None
         if gen:
             self.symbols = [genomes[0].symbols(len(headLengths), False)]
-            self.symbols.append(genomes[1].symbols(len(headLengths), True))
+            self.symbols.append(genomes[-1].symbols(len(headLengths), True))
             self.genomes = genomes
 
             heads = [genomes[0].head(headLengths[i]) for i in range(len(headLengths))]
             tails = [genomes[0].tail(headLengths[i]) for i in range(len(headLengths))]
-            homeotics = [genomes[1].homeotic(homeoticLengths[i], len(headLengths)) for i in range(len(homeoticLengths))]
-            homeoticTails = [genomes[1].homeoticTail(homeoticLengths[i], len(headLengths)) for i in range(len(homeoticLengths))]
+            homeotics = [genomes[-1].homeotic(homeoticLengths[i], len(headLengths)) for i in range(len(homeoticLengths))]
+            homeoticTails = [genomes[-1].homeoticTail(homeoticLengths[i], len(headLengths)) for i in range(len(homeoticLengths))]
             self.headRanges = []
             self.tailRanges = []
             self.homeoticRanges = []
@@ -193,7 +193,7 @@ class Chromosome:
 
             else:
                 if genes[index][1]:
-                    node = Node(gene[0], self.genomes[1].arities[gene[0]])
+                    node = Node(gene[0], self.genomes[-1].arities[gene[0]])
 
                 else:
                     node = Node(gene[0], self.genomes[0].arities[gene[0]])
@@ -205,7 +205,7 @@ class Chromosome:
 
                 else:
                     if genes[index][1]:
-                        node.append(symbol, self.genomes[1].arities[symbol])
+                        node.append(symbol, self.genomes[-1].arities[symbol])
 
                     else:
                         node.append(symbol, self.genomes[0].arities[symbol])
@@ -213,7 +213,7 @@ class Chromosome:
         homeoticInputs = {}
         for index in range(len(trees)):
             if trees[index][1]:
-                homeoticInputs[index] = trees[index][0].eval(self.genomes[1], homeoticInputs)
+                homeoticInputs[index] = trees[index][0].eval(self.genomes[-1], homeoticInputs)
 
             else:
                 homeoticInputs[index] = trees[index][0].eval(self.genomes[0], inputs[index])
@@ -603,5 +603,5 @@ genome.addTerminal("c")
 # outputs["Source"].traverse()
 
 simulation = Environment(100, mutationRate=1/38, inversionRate=0.05, ISTranspositionRate=0.15, RISTranspositionRate=0.2, geneTranspositionRate=.3, onePointRecombinationRate=.05, twoPointRecombinationRate=.1, geneRecombinationRate=.2)
-simulation.init([7], [], [genome, genome])
+simulation.init([7], [], [genome])
 simulation.run(fitnessParity)
